@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "129013952899",
+    "project_id": "velemajstor-4b27c",
+    "storage_bucket": "velemajstor-4b27c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129013952899:android:9b47cc6f77c2bcd47286b6",
+        "android_client_info": {
+          "package_name": "com.example.velemajstor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "129013952899-a9k355t4gg3te8e1df8v515ljkacpap3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAuivg23_JnX_FNOWPl4V2xnOmdTTIekkE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "129013952899-a9k355t4gg3te8e1df8v515ljkacpap3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
