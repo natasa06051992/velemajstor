@@ -1,7 +1,14 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:velemajstor/widgets/pickers/user_image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class AuthForm extends StatefulWidget {
   final bool isLoading;
@@ -50,8 +57,81 @@ class _AuthFormState extends State<AuthForm> {
     }
   }
 
+  static Future<File> urlToFile(String imageUrl) async {
+// generate random number.
+    var rng = new Random();
+// get temporary directory of device.
+    Directory tempDir = await getTemporaryDirectory();
+// get temporary path from temporary directory.
+    String tempPath = tempDir.path;
+// create a new file in temporary path with random file name.
+    File file = new File('$tempPath' + (rng.nextInt(100)).toString() + '.png');
+// call http.get method and pass imageUrl into it to get response.
+    http.Response response = await http.get(Uri.parse(imageUrl));
+// write bodyBytes received in response to file.
+    await file.writeAsBytes(response.bodyBytes);
+// now return the file which is created with random name in
+// temporary directory and image bytes from response is written to // that file.
+    return file;
+  }
+
+  static BuildContext _context;
+  static Future<User> _signInWithGoogle() async {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    User user;
+
+    final GoogleSignIn googleSignIn = GoogleSignIn();
+
+    final GoogleSignInAccount googleSignInAccount = await googleSignIn.signIn();
+
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleSignInAuthentication =
+          await googleSignInAccount.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      try {
+        final UserCredential userCredential =
+            await auth.signInWithCredential(credential);
+
+        user = userCredential.user;
+
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('user_image')
+            .child(user.uid + '.jpg');
+        await urlToFile(user.photoURL).then((value) => ref.putFile(value));
+
+        FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'username': user.displayName,
+          'email': user.email,
+          'url': user.photoURL,
+        });
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'account-exists-with-different-credential') {
+          ScaffoldMessenger.of(_context).showSnackBar(SnackBar(
+              content: Text(
+                  'The account already exists with a different credential.')));
+        } else if (e.code == 'invalid-credential') {
+          ScaffoldMessenger.of(_context).showSnackBar(SnackBar(
+              content: Text(
+                  'Error occurred while accessing credentials. Try again.')));
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(_context).showSnackBar(SnackBar(
+            content: Text('Error occurred using Google Sign-In. Try again.')));
+      }
+    }
+
+    return user;
+  }
+
   @override
   Widget build(BuildContext context) {
+    _context = context;
     return Column(
       // mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -121,6 +201,21 @@ class _AuthFormState extends State<AuthForm> {
                           },
                         ),
                         SizedBox(height: 12),
+                        ElevatedButton(
+                          onPressed: () async {
+                            _signInWithGoogle();
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Image.asset(
+                                'assets/images/google_logo.png',
+                                height: 30,
+                              ),
+                              Text('Continue with Google')
+                            ],
+                          ),
+                        ),
                         if (widget.isLoading) CircularProgressIndicator(),
                         if (!widget.isLoading)
                           RaisedButton(
