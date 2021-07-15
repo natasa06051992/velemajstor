@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,7 +26,7 @@ class _AuthScreenState extends State<AuthScreen> {
     bool isLogin,
     BuildContext ctx,
   ) async {
-    AuthResult authResult;
+    UserCredential authResult;
     try {
       setState(() {
         isLoading = true;
@@ -42,16 +43,16 @@ class _AuthScreenState extends State<AuthScreen> {
             .child('user_image')
             .child(authResult.user.uid + '.jpg');
 
-        await ref.putFile(image).onComplete;
-        final url = await ref.getDownloadURL();
-
-        await Firestore.instance
-            .collection('users')
-            .document(authResult.user.uid)
-            .setData({
-          'username': username,
-          'email': email,
-          'url':url,
+        await ref.putFile(image);
+        await ref.getDownloadURL().then((value) {
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(authResult.user.uid)
+              .set({
+            'username': username,
+            'email': email,
+            'url': value,
+          });
         });
       }
     } on PlatformException catch (e) {

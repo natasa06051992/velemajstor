@@ -7,7 +7,7 @@ class Messages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: FirebaseAuth.instance.currentUser(),
+      future: Future.value(FirebaseAuth.instance.currentUser),
       builder: (ctx, futureSnapshot) {
         if (futureSnapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -15,7 +15,7 @@ class Messages extends StatelessWidget {
           );
         }
         return StreamBuilder(
-            stream: Firestore.instance
+            stream: FirebaseFirestore.instance
                 .collection('chat')
                 .orderBy(
                   'createdAt',
@@ -28,7 +28,7 @@ class Messages extends StatelessWidget {
                   child: CircularProgressIndicator(),
                 );
               }
-              final chatDocs = chatSnapshot.data.documents;
+              final chatDocs = chatSnapshot.data.docs;
               return ListView.builder(
                 reverse: true,
                 itemCount: chatDocs.length,
@@ -37,7 +37,7 @@ class Messages extends StatelessWidget {
                     chatDocs[index]['username'],
                     chatDocs[index]['userImage'],
                     chatDocs[index]['userId'] == futureSnapshot.data.uid,
-                    ValueKey(chatDocs[index].documentID)),
+                    ValueKey(chatDocs[index])),
               );
             });
       },
