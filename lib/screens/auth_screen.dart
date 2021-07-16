@@ -51,6 +51,7 @@ class _AuthScreenState extends State<AuthScreen> {
             'username': username,
             'email': email,
             'url': value,
+            'about': ''
           });
         });
       }

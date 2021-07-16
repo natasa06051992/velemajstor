@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:velemajstor/widgets/chat/messages.dart';
 import 'package:velemajstor/widgets/chat/new_message.dart';
 
@@ -12,39 +13,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('FlutterChat'),
-        actions: [
-          DropdownButton(
-            icon: Icon(
-              Icons.more_vert,
-              color: Theme.of(context).primaryIconTheme.color,
-            ),
-            items: [
-              DropdownMenuItem(
-                child: Container(
-                  child: Row(
-                    children: <Widget>[
-                      Icon(
-                        Icons.exit_to_app,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      SizedBox(width: 8),
-                      Text('Logout'),
-                    ],
-                  ),
-                ),
-                value: 'logout',
-              ),
-            ],
-            onChanged: (itemIdentifier) {
-              if (itemIdentifier == 'logout') {
-                FirebaseAuth.instance.signOut();
-              }
-            },
-          ),
-        ],
-      ),
+      appBar: buildAppBar(context, 'Chat'),
       body: Container(
         child: Column(
           children: [

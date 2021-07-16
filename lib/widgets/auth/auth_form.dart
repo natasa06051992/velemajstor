@@ -109,6 +109,7 @@ class _AuthFormState extends State<AuthForm> {
           'username': user.displayName,
           'email': user.email,
           'url': user.photoURL,
+          'about': "",
         });
       } on FirebaseAuthException catch (e) {
         if (e.code == 'account-exists-with-different-credential') {
