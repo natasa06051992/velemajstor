@@ -24,10 +24,10 @@ class AuthForm extends StatefulWidget {
   ) submitFn;
 
   @override
-  _AuthFormState createState() => _AuthFormState();
+  AuthFormState createState() => AuthFormState();
 }
 
-class _AuthFormState extends State<AuthForm> {
+class AuthFormState extends State<AuthForm> {
   final _formKey = GlobalKey<FormState>();
   var _isLogin = true;
   var _userEmail = '';
@@ -134,7 +134,6 @@ class _AuthFormState extends State<AuthForm> {
   Widget build(BuildContext context) {
     _context = context;
     return Column(
-      // mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Container(
           padding: EdgeInsets.all(7),
@@ -156,7 +155,7 @@ class _AuthFormState extends State<AuthForm> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        if (!_isLogin) UserImagePicker(_pickedImage),
+                        if (!_isLogin) UserImagePicker(_pickedImage, null),
                         TextFormField(
                           key: ValueKey('email'),
                           validator: (value) {

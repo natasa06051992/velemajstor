@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:velemajstor/screens/auth_screen.dart';
-import 'package:velemajstor/screens/chat_screen.dart';
 import 'package:velemajstor/screens/tabs_screen.dart';
 
 void main() async {

@@ -1,16 +1,19 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:velemajstor/screens/chat_screen.dart';
 import 'package:velemajstor/screens/profile_screen.dart';
 import 'package:velemajstor/model/user.dart' as us;
+import 'package:velemajstor/widgets/auth/auth_form.dart';
 
 class TabsScreen extends StatefulWidget {
   @override
   _TabsScreenState createState() => _TabsScreenState();
 }
 
-String about = 'Nati';
+String about = '';
 void getAbout(String uid) async {
   await FirebaseFirestore.instance
       .collection('users')
@@ -19,25 +22,38 @@ void getAbout(String uid) async {
       .then((value) => about = value['about']);
 }
 
+final user = FirebaseAuth.instance.currentUser;
+File imageOfUser;
+Future<File> getImage() async {
+  return await AuthFormState.urlToFile(user.photoURL);
+  //.then((value) => imageOfUser = value);
+}
+
 class _TabsScreenState extends State<TabsScreen> {
-  final user = FirebaseAuth.instance.currentUser;
-
   List<Map<String, Object>> pages;
-
+  bool isLoading = true;
   @override
   void initState() {
-    getAbout(user.uid);
-    pages = [
-      {'page': ChatScreen(), 'title': 'Chat'},
-      {
-        'page': ProfileScreen(us.User(
+    getImage().then((value) {
+      pages = [
+        {'page': ChatScreen(), 'title': 'Chat'},
+        {
+          'page': ProfileScreen(us.User(
             imagePath: user.photoURL,
             about: about,
             name: user.displayName,
-            email: user.email)),
-        'title': 'Profile'
-      },
-    ];
+            email: user.email,
+            image: value,
+          )),
+          'title': 'Profile'
+        },
+      ];
+      setState(() {
+        isLoading = false;
+      });
+    });
+    getAbout(user.uid);
+
     // TODO: implement initState
     super.initState();
   }
@@ -52,7 +68,9 @@ class _TabsScreenState extends State<TabsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: pages[_selectedPageIndex]['page'],
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : pages[_selectedPageIndex]['page'],
       bottomNavigationBar: BottomNavigationBar(
         onTap: _selectPage,
         backgroundColor: Theme.of(context).primaryColor,
