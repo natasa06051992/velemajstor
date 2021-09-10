@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:velemajstor/screens/chatRoom.dart';
 import 'package:velemajstor/screens/chat_screen.dart';
 import 'package:velemajstor/screens/profile_screen.dart';
 import 'package:velemajstor/model/user.dart' as us;
@@ -36,7 +37,7 @@ class _TabsScreenState extends State<TabsScreen> {
   void initState() {
     getImage().then((value) {
       pages = [
-        {'page': ChatScreen(), 'title': 'Chat'},
+        {'page': ChatRoom(), 'title': 'Chat'},
         {
           'page': ProfileScreen(us.User(
             imagePath: user.photoURL,
