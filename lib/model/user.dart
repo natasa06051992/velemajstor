@@ -7,6 +7,7 @@ class User {
   final String name;
   final String email;
   final String about;
+  final String id;
   File image;
 
   set setImage(File imageE) {
@@ -18,6 +19,7 @@ class User {
     @required this.name,
     @required this.email,
     @required this.about,
+    @required this.id,
     this.image,
   });
 }

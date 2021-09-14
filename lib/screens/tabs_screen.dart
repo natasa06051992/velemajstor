@@ -37,9 +37,20 @@ class _TabsScreenState extends State<TabsScreen> {
   void initState() {
     getImage().then((value) {
       pages = [
-        {'page': ChatRoom(), 'title': 'Chat'},
+        {
+          'page': ChatRoom(us.User(
+            id: user.uid,
+            imagePath: user.photoURL,
+            about: about,
+            name: user.displayName,
+            email: user.email,
+            image: value,
+          )),
+          'title': 'Chat'
+        },
         {
           'page': ProfileScreen(us.User(
+            id: user.uid,
             imagePath: user.photoURL,
             about: about,
             name: user.displayName,
