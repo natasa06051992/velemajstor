@@ -1,21 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/model/user.dart';
 import 'package:velemajstor/screens/chatRoomListTile.dart';
 import 'package:velemajstor/screens/chat_screen.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 
 class ChatRoom extends StatefulWidget {
-  final User user;
-
-  const ChatRoom(this.user);
+  const ChatRoom();
   @override
   _ChatRoomState createState() => _ChatRoomState();
 }
 
 class _ChatRoomState extends State<ChatRoom> {
-  String myUsername, myProfilePic, myUserName, myEmail, chatRoomId;
+  String chatRoomId;
   User chatWithUser;
+
   TextEditingController searchUsernameEditingController =
       TextEditingController();
   Stream usersStream, chatRoomsStream;
@@ -23,21 +23,12 @@ class _ChatRoomState extends State<ChatRoom> {
   Future<Stream<QuerySnapshot>> getChatRoomsInFirebase() async {
     var t = FirebaseFirestore.instance
         .collection("chatrooms")
-        .where("users", arrayContains: myUsername)
+        .where("users", arrayContains: UserSharedPreferences.getUserName())
         .orderBy("lastMessageSendTs", descending: true);
     return t?.snapshots();
   }
 
-  getMyInfoFromSharedPreference() async {
-    myProfilePic = widget.user.imagePath;
-    myUserName = widget.user.name;
-    myEmail = widget.user.email;
-
-    setState(() {});
-  }
-
   onScreenLoaded() async {
-    await getMyInfoFromSharedPreference();
     await getChatRooms();
   }
 
@@ -57,14 +48,19 @@ class _ChatRoomState extends State<ChatRoom> {
                 shrinkWrap: true,
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data?.docs[index];
-                  if (ds.id.toString().contains(widget.user.id)) {
-                    return ChatRoomListTile(
-                        ds["lastMessage"], ds.id, widget.user);
+                  if (ds.id
+                      .toString()
+                      .contains(UserSharedPreferences.getUserId())) {
+                    var uid = ds.id
+                        .replaceAll(UserSharedPreferences.getUserId(), "")
+                        .replaceAll("_", "");
+
+                    return ChatRoomListTile(ds["lastMessage"], uid);
                   } else {
                     return Container();
                   }
                 })
-            : Center(child: CircularProgressIndicator());
+            : Center();
       },
     );
   }
@@ -74,7 +70,7 @@ class _ChatRoomState extends State<ChatRoom> {
     setState(() {});
     usersStream = FirebaseFirestore.instance
         .collection('users')
-        .where('username', isNotEqualTo: widget.user.name)
+        .where('username', isNotEqualTo: UserSharedPreferences.getUserName())
         .where('username',
             isGreaterThanOrEqualTo: searchUsernameEditingController.text)
         .where('username',
@@ -171,16 +167,16 @@ class _ChatRoomState extends State<ChatRoom> {
       onTap: () {
         getUserInfo(username).then((value) async {
           chatWithUser = value;
-          chatRoomId =
-              await getChatRoomIdByUsernames(chatWithUser.id, widget.user.id);
+          chatRoomId = await getChatRoomIdByUsernames(
+              chatWithUser.id, UserSharedPreferences.getUserId());
           Map<String, dynamic> chatRoomInfoMap = {
-            "users": [myUserName, username]
+            "users": [UserSharedPreferences.getUserName(), username]
           };
           createChatRoomInFirebase(chatRoomId, chatRoomInfoMap);
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => ChatScreen(chatWithUser, widget.user)));
+                  builder: (context) => ChatScreen(chatWithUser)));
         });
       },
       child: Container(

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/chatRoom.dart';
 import 'package:velemajstor/screens/chat_screen.dart';
 import 'package:velemajstor/screens/profile_screen.dart';
@@ -33,38 +34,33 @@ Future<File> getImage() async {
 class _TabsScreenState extends State<TabsScreen> {
   List<Map<String, Object>> pages;
   bool isLoading = true;
+  static us.User currentUser;
   @override
   void initState() {
-    getImage().then((value) {
+    getImage().then((value) async {
+      await getAbout(user.uid);
+      currentUser = us.User(
+        id: user.uid,
+        imagePath: user.photoURL,
+        about: about,
+        name: user.displayName,
+        email: user.email,
+        image: value,
+      );
       pages = [
-        {
-          'page': ChatRoom(us.User(
-            id: user.uid,
-            imagePath: user.photoURL,
-            about: about,
-            name: user.displayName,
-            email: user.email,
-            image: value,
-          )),
-          'title': 'Chat'
-        },
-        {
-          'page': ProfileScreen(us.User(
-            id: user.uid,
-            imagePath: user.photoURL,
-            about: about,
-            name: user.displayName,
-            email: user.email,
-            image: value,
-          )),
-          'title': 'Profile'
-        },
+        {'page': ChatRoom(), 'title': 'Chat'},
+        {'page': ProfileScreen(), 'title': 'Profile'},
       ];
       setState(() {
         isLoading = false;
       });
     });
-    getAbout(user.uid);
+    UserSharedPreferences.saveAbout(about);
+    UserSharedPreferences.saveUser(currentUser);
+    UserSharedPreferences.saveUserEmail(user.email);
+    UserSharedPreferences.saveUserId(user.uid);
+    UserSharedPreferences.saveUserName(user.displayName);
+    UserSharedPreferences.saveUserProfileUrl(user.photoURL);
 
     // TODO: implement initState
     super.initState();

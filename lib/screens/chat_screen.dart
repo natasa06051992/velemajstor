@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/model/user.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:random_string/random_string.dart';
 
 class ChatScreen extends StatefulWidget {
-  final User user;
   final User chatWithUser;
-  ChatScreen(this.chatWithUser, this.user);
+  ChatScreen(this.chatWithUser);
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -16,21 +16,16 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   String chatRoomId, messageId = "";
   Stream messageStream;
-  String myName, myProfilePic, myUserName, myEmail;
   TextEditingController messageTextEdittingController = TextEditingController();
 
   getMyInfoFromSharedPreference() async {
-    myProfilePic = widget.user.imagePath;
-    myUserName = widget.user.name;
-    myEmail = widget.user.email;
-
-    chatRoomId =
-        await getChatRoomIdByUsernames(widget.chatWithUser.id, widget.user.id);
+    chatRoomId = await getChatRoomIdByUsernames(
+        widget.chatWithUser.id, UserSharedPreferences.getUserId());
   }
 
   getChatRoomIdByUsernames(String a, String b) async {
     bool docExists = await checkIfDocExists("$b\_$a");
-    print("Document exists in Firestore? " + docExists.toString());
+
     if (docExists) {
       return "$b\_$a";
     } else {
@@ -62,8 +57,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 reverse: true,
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data.docs[index];
-                  return chatMessageTile(
-                      ds["message"], myUserName == ds["sendBy"]);
+                  return chatMessageTile(ds["message"],
+                      UserSharedPreferences.getUserName() == ds["sendBy"]);
                 })
             : Center(child: CircularProgressIndicator());
       },
@@ -131,9 +126,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
       Map<String, dynamic> messageInfoMap = {
         "message": message,
-        "sendBy": myUserName,
+        "sendBy": UserSharedPreferences.getUserName(),
         "ts": lastMessageTs,
-        "imgUrl": myProfilePic
+        "imgUrl": UserSharedPreferences.getProfileUrl()
       };
 
       //messageId
@@ -145,7 +140,7 @@ class _ChatScreenState extends State<ChatScreen> {
         Map<String, dynamic> lastMessageInfoMap = {
           "lastMessage": message,
           "lastMessageSendTs": lastMessageTs,
-          "lastMessageSendBy": myUserName
+          "lastMessageSendBy": UserSharedPreferences.getUserName()
         };
 
         updateLastMessageSendInFirebase(chatRoomId, lastMessageInfoMap);

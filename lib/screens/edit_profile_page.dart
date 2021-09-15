@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:velemajstor/widgets/button_widget.dart';
 import 'package:velemajstor/widgets/pickers/user_image_picker.dart';
@@ -11,18 +12,15 @@ import 'package:velemajstor/model/user.dart' as us;
 import 'package:velemajstor/widgets/auth/auth_form.dart';
 
 class EditProfilePage extends StatefulWidget {
-  final us.User user;
-
-  const EditProfilePage(this.user);
+  const EditProfilePage();
   @override
-  _EditProfilePageState createState() => _EditProfilePageState(user);
+  _EditProfilePageState createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
   var isLoading = false;
   final _formKey = GlobalKey<FormState>();
-  final us.User user;
-  _EditProfilePageState(this.user);
+  _EditProfilePageState();
 
   void _trySubmit(BuildContext context) {
     final isValid = _formKey.currentState.validate();
@@ -47,19 +45,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
     User authResult = FirebaseAuth.instance.currentUser;
     try {
       authResult.updateDisplayName(username);
-      // final ref = FirebaseStorage.instance
-      //     .ref()
-      //     .child('user_image')
-      //     .child(authResult.user.uid + '.jpg');
-
-      // await ref.putFile(image);
-      // await ref.getDownloadURL().then((value) {
-      FirebaseFirestore.instance.collection('users').doc(authResult.uid).set({
-        'username': username,
-        // 'url': value,
-        'about': about
-        //  });
-      });
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(authResult.uid)
+          .set({'username': username, 'about': about});
     } on PlatformException catch (e) {
       var message = 'An error occurred, please check your credentials!';
       if (e.message != null) {
@@ -92,7 +81,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             padding: EdgeInsets.symmetric(horizontal: 32),
             physics: BouncingScrollPhysics(),
             children: [
-              UserImagePicker(_pickedImage, user.image),
+              UserImagePicker(
+                  _pickedImage, UserSharedPreferences.currentUser.image),
               const SizedBox(height: 24),
               TextFormField(
                 key: ValueKey('username'),
@@ -102,7 +92,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   }
                   return null;
                 },
-                initialValue: user.name,
+                initialValue: UserSharedPreferences.getUserName(),
                 decoration: InputDecoration(labelText: 'Username'),
                 onSaved: (value) {
                   _userName = value;
@@ -111,7 +101,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               const SizedBox(height: 24),
               TextFormField(
                 key: ValueKey('about'),
-                initialValue: user.about,
+                initialValue: UserSharedPreferences.getAbout(),
                 keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
                   labelText: 'About',
