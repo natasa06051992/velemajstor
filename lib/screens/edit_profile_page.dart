@@ -5,11 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:velemajstor/model/sharedPreferences.dart';
+import 'package:velemajstor/screens/profile_screen.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:velemajstor/widgets/button_widget.dart';
 import 'package:velemajstor/widgets/pickers/user_image_picker.dart';
-import 'package:velemajstor/model/user.dart' as us;
-import 'package:velemajstor/widgets/auth/auth_form.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage();
@@ -48,7 +47,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       FirebaseFirestore.instance
           .collection('users')
           .doc(authResult.uid)
-          .set({'username': username, 'about': about});
+          .update({'username': username, 'about': about});
+      UserSharedPreferences.saveAbout(about);
+      UserSharedPreferences.saveUserName(username);
     } on PlatformException catch (e) {
       var message = 'An error occurred, please check your credentials!';
       if (e.message != null) {
@@ -82,7 +83,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             physics: BouncingScrollPhysics(),
             children: [
               UserImagePicker(
-                  _pickedImage, UserSharedPreferences.currentUser.image),
+                  _pickedImage, UserSharedPreferences.getUser().image),
               const SizedBox(height: 24),
               TextFormField(
                 key: ValueKey('username'),
@@ -115,7 +116,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   text: 'Save',
                   onClicked: () {
                     _trySubmit(context);
-                    Navigator.of(context).pop();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfileScreen()),
+                    );
                   }),
             ],
           ),

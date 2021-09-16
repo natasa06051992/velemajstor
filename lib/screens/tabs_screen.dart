@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/chatRoom.dart';
-import 'package:velemajstor/screens/chat_screen.dart';
 import 'package:velemajstor/screens/profile_screen.dart';
 import 'package:velemajstor/model/user.dart' as us;
 import 'package:velemajstor/widgets/auth/auth_form.dart';
@@ -15,30 +14,14 @@ class TabsScreen extends StatefulWidget {
   _TabsScreenState createState() => _TabsScreenState();
 }
 
-String about = '';
-void getAbout(String uid) async {
-  await FirebaseFirestore.instance
-      .collection('users')
-      .doc(uid)
-      .get()
-      .then((value) => about = value['about']);
-}
-
-final user = FirebaseAuth.instance.currentUser;
-File imageOfUser;
-Future<File> getImage() async {
-  return await AuthFormState.urlToFile(user.photoURL);
-  //.then((value) => imageOfUser = value);
-}
-
 class _TabsScreenState extends State<TabsScreen> {
   List<Map<String, Object>> pages;
   bool isLoading = true;
   static us.User currentUser;
   @override
   void initState() {
-    getImage().then((value) async {
-      await getAbout(user.uid);
+    getImage().then((value) {
+      getAbout(user.uid);
       currentUser = us.User(
         id: user.uid,
         imagePath: user.photoURL,
@@ -54,16 +37,31 @@ class _TabsScreenState extends State<TabsScreen> {
       setState(() {
         isLoading = false;
       });
+      UserSharedPreferences.saveAbout(about);
+      UserSharedPreferences.saveUser(currentUser);
+      UserSharedPreferences.saveUserEmail(user.email);
+      UserSharedPreferences.saveUserId(user.uid);
+      UserSharedPreferences.saveUserName(user.displayName);
+      UserSharedPreferences.saveUserProfileUrl(user.photoURL);
     });
-    UserSharedPreferences.saveAbout(about);
-    UserSharedPreferences.saveUser(currentUser);
-    UserSharedPreferences.saveUserEmail(user.email);
-    UserSharedPreferences.saveUserId(user.uid);
-    UserSharedPreferences.saveUserName(user.displayName);
-    UserSharedPreferences.saveUserProfileUrl(user.photoURL);
 
     // TODO: implement initState
     super.initState();
+  }
+
+  String about = '';
+  void getAbout(String uid) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .get()
+        .then((value) => about = value['about']);
+  }
+
+  final user = FirebaseAuth.instance.currentUser;
+  File imageOfUser;
+  Future<File> getImage() async {
+    return await AuthFormState.urlToFile(user.photoURL);
   }
 
   int _selectedPageIndex = 0;

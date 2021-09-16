@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:velemajstor/model/user.dart';
 
@@ -60,5 +61,26 @@ class UserSharedPreferences {
 
   static String getAbout() {
     return _sharedPreferences.getString(userAboutKey);
+  }
+
+  static getChatRoomIdByUsernames(String a, String b) async {
+    bool docExists = await checkIfDocExists("$b\_$a");
+
+    if (docExists) {
+      return "$b\_$a";
+    } else {
+      return "$a\_$b";
+    }
+  }
+
+  static Future<bool> checkIfDocExists(String docId) async {
+    try {
+      var collectionRef = FirebaseFirestore.instance.collection('chatrooms');
+
+      var doc = await collectionRef.doc(docId).get();
+      return doc.exists;
+    } catch (e) {
+      throw e;
+    }
   }
 }

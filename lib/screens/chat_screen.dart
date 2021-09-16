@@ -14,36 +14,13 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  String chatRoomId, messageId = "";
+  String chatRoomId, messageId;
   Stream messageStream;
   TextEditingController messageTextEdittingController = TextEditingController();
 
   getMyInfoFromSharedPreference() async {
-    chatRoomId = await getChatRoomIdByUsernames(
+    chatRoomId = await UserSharedPreferences.getChatRoomIdByUsernames(
         widget.chatWithUser.id, UserSharedPreferences.getUserId());
-  }
-
-  getChatRoomIdByUsernames(String a, String b) async {
-    bool docExists = await checkIfDocExists("$b\_$a");
-
-    if (docExists) {
-      return "$b\_$a";
-    } else {
-      return "$a\_$b";
-    }
-  }
-
-  /// Check If Document Exists
-  Future<bool> checkIfDocExists(String docId) async {
-    try {
-      // Get reference to Firestore collection
-      var collectionRef = FirebaseFirestore.instance.collection('chatrooms');
-
-      var doc = await collectionRef.doc(docId).get();
-      return doc.exists;
-    } catch (e) {
-      throw e;
-    }
   }
 
   Widget chatMessages() {
@@ -118,7 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
   }
 
-  addMessage(bool sendClicked) {
+  addMessage() {
     if (messageTextEdittingController.text != "") {
       String message = messageTextEdittingController.text;
 
@@ -145,11 +122,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
         updateLastMessageSendInFirebase(chatRoomId, lastMessageInfoMap);
 
-        if (sendClicked) {
-          messageTextEdittingController.text = "";
-          messageId = "";
-          getAndSetMessages();
-        }
+        messageTextEdittingController.text = "";
+        messageId = "";
+        getAndSetMessages();
       });
     }
   }
@@ -189,9 +164,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     Expanded(
                         child: TextField(
                       controller: messageTextEdittingController,
-                      // onChanged: (value) {
-                      //   addMessage(false);
-                      // },
                       style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                           border: InputBorder.none,
@@ -201,7 +173,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     )),
                     GestureDetector(
                       onTap: () {
-                        addMessage(true);
+                        addMessage();
                       },
                       child: Icon(
                         Icons.send,
@@ -215,16 +187,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
-      // body: Container(
-      //   child: Column(
-      //     children: [
-      //       Expanded(
-      //         child: Messages(),
-      //       ),
-      //       NewMessage(),
-      //     ],
-      //   ),
-      // ),
     );
   }
 }

@@ -3,7 +3,6 @@ import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/edit_profile_page.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:velemajstor/widgets/profile_widget.dart';
-import 'package:velemajstor/model/user.dart' as us;
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen();
