@@ -9,7 +9,6 @@ import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/profile_screen.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:velemajstor/widgets/button_widget.dart';
-import 'package:image_picker_form_field/image_picker_form_field.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage();
