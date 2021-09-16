@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:velemajstor/model/user.dart';
@@ -38,9 +40,17 @@ class UserSharedPreferences {
     currentUser = user;
   }
 
+  static void saveImage(File image) {
+    currentUser.image = image;
+  }
+
   // get data
-  static getUser() {
+  static User getUser() {
     return currentUser;
+  }
+
+  static File getImage() {
+    return currentUser.image;
   }
 
   static String getUserName() {

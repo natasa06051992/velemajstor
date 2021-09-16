@@ -117,7 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
         Map<String, dynamic> lastMessageInfoMap = {
           "lastMessage": message,
           "lastMessageSendTs": lastMessageTs,
-          "lastMessageSendBy": UserSharedPreferences.getUserName()
+          "lastMessageSendBy": UserSharedPreferences.getUserId()
         };
 
         updateLastMessageSendInFirebase(chatRoomId, lastMessageInfoMap);

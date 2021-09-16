@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/edit_profile_page.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
-import 'package:velemajstor/widgets/profile_widget.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen();
@@ -11,13 +10,17 @@ class ProfileScreen extends StatelessWidget {
     return Scaffold(
       appBar: buildAppBar(context, 'Profile'),
       body: ListView(physics: BouncingScrollPhysics(), children: [
-        ProfileWidget(
-            imagePath: UserSharedPreferences.getProfileUrl(),
-            onClicked: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => EditProfilePage()),
-              );
-            }),
+        GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => EditProfilePage()));
+          },
+          child: CircleAvatar(
+            backgroundImage:
+                NetworkImage(UserSharedPreferences.getProfileUrl()),
+            radius: 55,
+          ),
+        ),
         const SizedBox(height: 24),
         buildName(UserSharedPreferences.getUserName()),
         const SizedBox(height: 48),

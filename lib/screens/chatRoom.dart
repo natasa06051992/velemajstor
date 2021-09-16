@@ -96,7 +96,7 @@ class _ChatRoomState extends State<ChatRoom> {
   Future<Stream<QuerySnapshot>> getChatRoomsFromFirebase() async {
     return FirebaseFirestore.instance
         .collection("chatrooms")
-        .where("chatUsers", arrayContains: UserSharedPreferences.getUserName())
+        .where("chatUsers", arrayContains: UserSharedPreferences.getUserId())
         .orderBy("lastMessageSendTs", descending: true)
         .snapshots();
   }
@@ -162,9 +162,10 @@ class _ChatRoomState extends State<ChatRoom> {
                 itemBuilder: (context, index) {
                   DocumentSnapshot ds = snapshot.data.docs[index];
                   return searchListUserTile(
-                      profileUrl: ds["url"],
-                      email: ds["email"],
-                      username: ds["username"]);
+                      chatWithUserProfileUrl: ds["url"],
+                      chatWithUserEmail: ds["email"],
+                      chatWithUserUsername: ds["username"],
+                      chatWithUserId: ds.id);
                 },
               )
             : Center(
@@ -192,34 +193,38 @@ class _ChatRoomState extends State<ChatRoom> {
     }
   }
 
-  Future<User> getUserInfo(String username) async {
+  Future<User> getUserInfo(String chatWithUserId) async {
     await FirebaseFirestore.instance
         .collection("users")
-        .where("username", isEqualTo: username)
+        .doc(chatWithUserId)
         .get()
         .then((value) {
       chatWithUser = User(
-        id: value.docs[0].id,
-        about: value.docs[0]["about"],
-        email: value.docs[0]["email"],
-        imagePath: value.docs[0]["url"],
-        name: value.docs[0]["username"],
+        id: value.id,
+        about: value["about"],
+        email: value["email"],
+        imagePath: value["url"],
+        name: value["username"],
       );
     });
     return chatWithUser;
   }
 
-  Widget searchListUserTile({String profileUrl, username, email}) {
+  Widget searchListUserTile(
+      {String chatWithUserProfileUrl,
+      chatWithUserEmail,
+      chatWithUserUsername,
+      chatWithUserId}) {
     User chatWithUser;
 
     return GestureDetector(
       onTap: () {
-        getUserInfo(username).then((value) async {
+        getUserInfo(chatWithUserId).then((value) async {
           chatWithUser = value;
           chatRoomId = await UserSharedPreferences.getChatRoomIdByUsernames(
               chatWithUser.id, UserSharedPreferences.getUserId());
           Map<String, dynamic> chatRoomInfoMap = {
-            "chatUsers": [UserSharedPreferences.getUserName(), username]
+            "chatUsers": [UserSharedPreferences.getUserId(), chatWithUserId]
           };
           createChatRoomInFirebase(chatRoomId, chatRoomInfoMap);
           Navigator.push(
@@ -235,7 +240,7 @@ class _ChatRoomState extends State<ChatRoom> {
             ClipRRect(
               borderRadius: BorderRadius.circular(40),
               child: Image.network(
-                profileUrl,
+                chatWithUserProfileUrl,
                 height: 40,
                 width: 40,
               ),
@@ -243,7 +248,7 @@ class _ChatRoomState extends State<ChatRoom> {
             SizedBox(width: 12),
             Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text(username), Text(email)])
+                children: [Text(chatWithUserUsername), Text(chatWithUserEmail)])
           ],
         ),
       ),
