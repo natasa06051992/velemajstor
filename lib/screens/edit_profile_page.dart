@@ -5,8 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:velemajstor/main.dart';
 import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/profile_screen.dart';
+import 'package:velemajstor/screens/tabs_screen.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:velemajstor/widgets/button_widget.dart';
 
@@ -27,8 +30,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
     if (isValid) {
       _formKey.currentState.save();
-      _submitAuthForm(
-          _userName.trim(), _userAbout.trim(), _userImageFile, context);
+      _submitAuthForm(_userName.trim(), _userAbout.trim(),
+          UserSharedPreferences.getImage(), context);
     }
   }
 
@@ -44,7 +47,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
       UserSharedPreferences.saveAbout(about);
       UserSharedPreferences.saveUserName(username);
-      UserSharedPreferences.saveImage(image);
+      //UserSharedPreferences.saveImage(image);
 
       var ref = FirebaseStorage.instance
           .ref()
@@ -52,11 +55,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
           .child(authResult.uid + '.jpg');
       await ref.putFile(image);
       await ref.getDownloadURL().then((value) {
+        UserSharedPreferences.saveUserProfileUrl(value);
         FirebaseFirestore.instance
             .collection('users')
             .doc(authResult.uid)
             .set({'username': username, 'url': value, 'about': about});
       });
+      // setState(() {});
+      // Navigator.of(context).pop();
     } on PlatformException catch (e) {
       var message = 'An error occurred, please check your credentials!';
       if (e.message != null) {
@@ -73,11 +79,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   var _userName = '';
   var _userAbout = '';
-  File _userImageFile;
-  void _pickedImage(File image) {
-    _userImageFile = image;
-  }
 
+  var imagePicker = ImagePicker();
+  File pickedFile;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +93,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
             padding: EdgeInsets.symmetric(horizontal: 32),
             physics: BouncingScrollPhysics(),
             children: [
-              //UserImagePicker(_pickedImage, UserSharedPreferences.getImage()),
+              Center(
+                child: Stack(children: [
+                  ClipOval(
+                      child: Image.file(
+                    UserSharedPreferences.getImage(),
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  )),
+                  Positioned(
+                      bottom: 10,
+                      right: 23,
+                      child: InkWell(
+                        onTap: () {
+                          showModalBottomSheet(
+                              context: context,
+                              builder: ((builder) => bottomSheet()));
+                        },
+                        child: Icon(Icons.camera_alt,
+                            size: 30, color: Colors.purple),
+                      ))
+                ]),
+              ),
               const SizedBox(height: 24),
               TextFormField(
                 key: ValueKey('username'),
@@ -122,15 +148,56 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   text: 'Save',
                   onClicked: () {
                     _trySubmit(context);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ProfileScreen()),
-                    );
+
+                    Navigator.of(context).pop();
                   }),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  void takePhoto(ImageSource source) async {
+    pickedFile = await ImagePicker.pickImage(source: source);
+
+    setState(() {
+      UserSharedPreferences.saveImage(pickedFile);
+    });
+  }
+
+  Widget bottomSheet() {
+    return Container(
+      height: 100,
+      width: MediaQuery.of(context).size.width,
+      margin: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+      child: Column(children: [
+        Text(
+          'Choose profile picture',
+        ),
+        SizedBox(height: 24),
+        Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+          FlatButton.icon(
+              onPressed: () {
+                takePhoto(ImageSource.camera);
+              },
+              icon: Icon(Icons.camera, color: Colors.deepPurple),
+              label: Text(
+                'Camera',
+                style: TextStyle(color: Colors.deepPurple),
+              )),
+          FlatButton.icon(
+            onPressed: () {
+              takePhoto(ImageSource.gallery);
+            },
+            icon: Icon(Icons.image, color: Colors.deepPurple),
+            label: Text(
+              'Gallery',
+              style: TextStyle(color: Colors.deepPurple),
+            ),
+          ),
+        ]),
+      ]),
     );
   }
 }

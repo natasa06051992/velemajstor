@@ -3,8 +3,14 @@ import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/edit_profile_page.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen();
+
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,13 +18,20 @@ class ProfileScreen extends StatelessWidget {
       body: ListView(physics: BouncingScrollPhysics(), children: [
         GestureDetector(
           onTap: () {
-            Navigator.of(context).push(
-                MaterialPageRoute(builder: (context) => EditProfilePage()));
+            Navigator.of(context)
+                .push(
+                    MaterialPageRoute(builder: (context) => EditProfilePage()))
+                .then((_) => setState(() {}));
+            ;
           },
-          child: CircleAvatar(
-            backgroundImage:
-                NetworkImage(UserSharedPreferences.getProfileUrl()),
-            radius: 55,
+          child: Center(
+            child: ClipOval(
+                child: Image.file(
+              UserSharedPreferences.getImage(),
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+            )),
           ),
         ),
         const SizedBox(height: 24),

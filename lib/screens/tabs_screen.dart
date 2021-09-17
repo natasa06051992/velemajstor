@@ -18,50 +18,23 @@ class _TabsScreenState extends State<TabsScreen> {
   List<Map<String, Object>> pages;
   bool isLoading = true;
   static us.User currentUser;
-  @override
-  void initState() {
-    getImage().then((value) {
-      getAbout(user.uid);
-      currentUser = us.User(
-        id: user.uid,
-        imagePath: user.photoURL,
-        about: about,
-        name: user.displayName,
-        email: user.email,
-        image: value,
-      );
-      pages = [
-        {'page': ChatRoom(), 'title': 'Chat'},
-        {'page': ProfileScreen(), 'title': 'Profile'},
-      ];
-      setState(() {
-        isLoading = false;
-      });
-      UserSharedPreferences.saveAbout(about);
-      UserSharedPreferences.saveUser(currentUser);
-      UserSharedPreferences.saveUserEmail(user.email);
-      UserSharedPreferences.saveUserId(user.uid);
-      UserSharedPreferences.saveUserName(user.displayName);
-      UserSharedPreferences.saveUserProfileUrl(user.photoURL);
-    });
 
-    // TODO: implement initState
-    super.initState();
-  }
-
-  String about = '';
-  void getAbout(String uid) async {
+  Future<String> getAbout(String uid) async {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .get()
-        .then((value) => about = value['about']);
+        .then((value) {
+      var about = value.data()['about'];
+      UserSharedPreferences.saveAbout(about);
+      return about;
+    });
   }
 
   final user = FirebaseAuth.instance.currentUser;
   File imageOfUser;
   Future<File> getImage() async {
-    return await AuthFormState.urlToFile(user.photoURL);
+    return await UserSharedPreferences.urlToFile(user.photoURL);
   }
 
   int _selectedPageIndex = 0;
@@ -71,8 +44,45 @@ class _TabsScreenState extends State<TabsScreen> {
     });
   }
 
+  void initInformations() {
+    getImage().then((value) async {
+      await getAbout(user.uid).then((aboutValue) {
+        currentUser = us.User(
+          id: user.uid,
+          imagePath: user.photoURL,
+          about: aboutValue,
+          name: user.displayName,
+          email: user.email,
+          image: value,
+        );
+      });
+
+      pages = [
+        {'page': ChatRoom(), 'title': 'Chat'},
+        {'page': ProfileScreen(), 'title': 'Profile'},
+      ];
+    }).whenComplete(() {
+      UserSharedPreferences.saveUser(currentUser);
+      UserSharedPreferences.saveUserEmail(user.email);
+      UserSharedPreferences.saveUserId(user.uid);
+      UserSharedPreferences.saveUserName(user.displayName);
+      UserSharedPreferences.saveUserProfileUrl(user.photoURL);
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant TabsScreen oldWidget) {
+    setState(() {
+      isLoading = false;
+    });
+    // TODO: implement didUpdateWidget
+    super.didUpdateWidget(oldWidget);
+  }
+
   @override
   Widget build(BuildContext context) {
+    initInformations();
+
     return Scaffold(
       body: isLoading
           ? Center(child: CircularProgressIndicator())
