@@ -32,6 +32,13 @@ dependencies:
   google_sign_in: ^5.0.4
   path_provider: ^2.0.2
   http: ^0.13.1
+  file_picker: ^1.4.0+1
+  emoji_picker: ^0.0.2
+  video_player: ^0.10.2+1
+  flutter_downloader: ^1.2.2
+  downloads_path_provider: ^0.1.0
+  flushbar: ^1.9.0
+  intl: ^0.16.1
 
   
 

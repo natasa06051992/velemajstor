@@ -22,7 +22,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 .push(
                     MaterialPageRoute(builder: (context) => EditProfilePage()))
                 .then((_) => setState(() {}));
-            ;
           },
           child: Center(
             child: ClipOval(

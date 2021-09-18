@@ -59,7 +59,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         FirebaseFirestore.instance
             .collection('users')
             .doc(authResult.uid)
-            .set({'username': username, 'url': value, 'about': about});
+            .update({'username': username, 'url': value, 'about': about});
       });
       // setState(() {});
       // Navigator.of(context).pop();

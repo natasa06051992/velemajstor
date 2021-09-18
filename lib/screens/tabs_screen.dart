@@ -19,6 +19,12 @@ class _TabsScreenState extends State<TabsScreen> {
   bool isLoading = true;
   static us.User currentUser;
 
+  @override
+  void initState() {
+    initInformations();
+    super.initState();
+  }
+
   Future<String> getAbout(String uid) async {
     await FirebaseFirestore.instance
         .collection('users')
@@ -67,22 +73,21 @@ class _TabsScreenState extends State<TabsScreen> {
       UserSharedPreferences.saveUserId(user.uid);
       UserSharedPreferences.saveUserName(user.displayName);
       UserSharedPreferences.saveUserProfileUrl(user.photoURL);
+
+      setState(() {
+        isLoading = false;
+      });
     });
   }
 
   @override
   void didUpdateWidget(covariant TabsScreen oldWidget) {
-    setState(() {
-      isLoading = false;
-    });
     // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
   }
 
   @override
   Widget build(BuildContext context) {
-    initInformations();
-
     return Scaffold(
       body: isLoading
           ? Center(child: CircularProgressIndicator())
