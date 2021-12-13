@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/model/user.dart';
-import 'package:velemajstor/screens/gradient_snack_bar.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:random_string/random_string.dart';
 
