@@ -6,10 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:velemajstor/main.dart';
 import 'package:velemajstor/model/sharedPreferences.dart';
-import 'package:velemajstor/screens/profile_screen.dart';
-import 'package:velemajstor/screens/tabs_screen.dart';
 import 'package:velemajstor/widgets/app_bar.dart';
 import 'package:velemajstor/widgets/button_widget.dart';
 
@@ -162,7 +159,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
     pickedFile = await ImagePicker.pickImage(source: source);
 
     setState(() {
-      UserSharedPreferences.saveImage(pickedFile);
+      if (pickedFile != null) {
+        UserSharedPreferences.saveImage(pickedFile);
+      }
     });
   }
 

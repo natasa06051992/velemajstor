@@ -182,7 +182,12 @@ class AuthFormState extends State<AuthForm> {
                           },
                         ),
                         SizedBox(height: 12),
-                        ElevatedButton(
+                        if (!widget.isLoading)
+                          RaisedButton(
+                            child: Text(_isLogin ? 'Login' : 'Signup'),
+                            onPressed: _trySubmit,
+                          ),
+                        RaisedButton(
                           onPressed: () async {
                             _signInWithGoogle();
                           },
@@ -198,11 +203,6 @@ class AuthFormState extends State<AuthForm> {
                           ),
                         ),
                         if (widget.isLoading) CircularProgressIndicator(),
-                        if (!widget.isLoading)
-                          RaisedButton(
-                            child: Text(_isLogin ? 'Login' : 'Signup'),
-                            onPressed: _trySubmit,
-                          ),
                         if (!widget.isLoading)
                           FlatButton(
                             textColor: Theme.of(context).accentColor,

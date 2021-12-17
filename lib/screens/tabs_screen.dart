@@ -7,7 +7,6 @@ import 'package:velemajstor/model/sharedPreferences.dart';
 import 'package:velemajstor/screens/chatRoom.dart';
 import 'package:velemajstor/screens/profile_screen.dart';
 import 'package:velemajstor/model/user.dart' as us;
-import 'package:velemajstor/widgets/auth/auth_form.dart';
 
 class TabsScreen extends StatefulWidget {
   @override
@@ -18,6 +17,39 @@ class _TabsScreenState extends State<TabsScreen> {
   List<Map<String, Object>> pages;
   bool isLoading = true;
   static us.User currentUser;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : pages[_selectedPageIndex]['page'],
+      bottomNavigationBar: BottomNavigationBar(
+        onTap: _selectPage,
+        backgroundColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.white,
+        selectedItemColor: Theme.of(context).accentColor,
+        currentIndex: _selectedPageIndex,
+        type: BottomNavigationBarType.shifting,
+        items: [
+          BottomNavigationBarItem(
+              backgroundColor: Theme.of(context).primaryColor,
+              icon: Icon(
+                Icons.chat,
+                color: Colors.white,
+              ),
+              title: Text('Chat')),
+          BottomNavigationBarItem(
+              backgroundColor: Theme.of(context).primaryColor,
+              icon: Icon(
+                Icons.person,
+                color: Colors.white,
+              ),
+              title: Text('Profile')),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -84,38 +116,5 @@ class _TabsScreenState extends State<TabsScreen> {
   void didUpdateWidget(covariant TabsScreen oldWidget) {
     // TODO: implement didUpdateWidget
     super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : pages[_selectedPageIndex]['page'],
-      bottomNavigationBar: BottomNavigationBar(
-        onTap: _selectPage,
-        backgroundColor: Theme.of(context).primaryColor,
-        unselectedItemColor: Colors.white,
-        selectedItemColor: Theme.of(context).accentColor,
-        currentIndex: _selectedPageIndex,
-        type: BottomNavigationBarType.shifting,
-        items: [
-          BottomNavigationBarItem(
-              backgroundColor: Theme.of(context).primaryColor,
-              icon: Icon(
-                Icons.chat,
-                color: Colors.white,
-              ),
-              title: Text('Chat')),
-          BottomNavigationBarItem(
-              backgroundColor: Theme.of(context).primaryColor,
-              icon: Icon(
-                Icons.person,
-                color: Colors.white,
-              ),
-              title: Text('Profile')),
-        ],
-      ),
-    );
   }
 }

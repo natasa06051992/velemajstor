@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'FlutterChat',
+      title: 'VeleMajstor',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
         backgroundColor: Colors.purple[400],
